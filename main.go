@@ -22,7 +22,7 @@ func FilterNyaaItems(in []NyaaTorrentItem, min int) []NyaaTorrentItem {
 
 func main() {
 	rssURL := flag.String("rss", "https://sukebei.nyaa.si/?page=rss&c=1_4&f=0", "rss url")
-	transURL := flag.String("transmission", "http://nas3.local:9091/transmission/rpc", "Transmission RPC url")
+	transURL := flag.String("transmission", "http://localhost:9091/transmission/rpc", "Transmission RPC url")
 	minPeer := flag.Int("min_peers", 100, "minimum peers")
 	path := flag.String("path", "/mnt/storage1/manga", "download path")
 
