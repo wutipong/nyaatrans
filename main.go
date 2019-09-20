@@ -1,14 +1,15 @@
 package main
 
 import (
-	"fmt"
+	"flag"
+	"log"
 )
 
-func FilterNyaaItems(in []NyaaTorrentItem) []NyaaTorrentItem {
+func FilterNyaaItems(in []NyaaTorrentItem, min int) []NyaaTorrentItem {
 	var out []NyaaTorrentItem
 
 	for _, i := range in {
-		if i.Seeder+i.Leecher < 100 {
+		if i.Seeder+i.Leecher < min {
 			continue
 		}
 
@@ -20,19 +21,37 @@ func FilterNyaaItems(in []NyaaTorrentItem) []NyaaTorrentItem {
 }
 
 func main() {
-	items, err := FetchTorrentItem("https://sukebei.nyaa.si/?page=rss&f=0&c=1_4&q=")
+	rssURL := flag.String("rss", "https://sukebei.nyaa.si/?page=rss&c=1_4&f=0", "rss url")
+	transURL := flag.String("transmission", "http://nas3.local:9091/transmission/rpc", "Transmission RPC url")
+	minPeer := flag.Int("min_peers", 100, "minimum peers")
+	path := flag.String("path", "/mnt/storage1/manga", "download path")
 
-	if err != nil {
-		fmt.Println(err)
+	if *rssURL == "" || *transURL == "" {
+		flag.Usage()
 		return
 	}
 
-	items = FilterNyaaItems(items)
+	items, err := FetchTorrentItem(*rssURL)
+
+	if err != nil {
+		log.Println(err)
+		return
+	}
+
+	items = FilterNyaaItems(items, *minPeer)
+
+	session, err := TransGetSession(*transURL)
+	if err != nil {
+		log.Println(err)
+		return
+	}
 
 	for _, i := range items {
-		fmt.Println(i.Link)
+		_, err := TransAddTorrent(*transURL, i.Link, session, *path)
+		if err != nil {
+			log.Println(err)
+			continue
+		}
 	}
-	fmt.Println(TransGetSession())
 
-	//TransAddTorrent(items[0].Link)
 }

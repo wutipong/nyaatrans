@@ -3,7 +3,6 @@ package main
 import (
 	"bytes"
 	"encoding/json"
-	"fmt"
 	"io/ioutil"
 	"net/http"
 )
@@ -14,38 +13,53 @@ type TransRequest struct {
 	Tag       int                    `json:"tag"`
 }
 
-func TransAddTorrent(url string) {
+func TransAddTorrent(rpc string, url string, session string, path string) (out string, err error) {
 	tr := TransRequest{
 		Method: "torrent-add",
 		Arguments: map[string]interface{}{
 			"filename":     url,
-			"download-dir": "/mnt/storage1/manga",
+			"download-dir": path,
 		},
 	}
-	b, _ := json.Marshal(tr)
+	b, err := json.Marshal(tr)
+	if err != nil {
+		return
+	}
 
 	buf := bytes.NewBuffer(b)
-	resp, err := http.Post("http://nas3.local:9091/transmission/rpc", "image/jpeg", buf)
+
+	client := &http.Client{}
+
+	req, err := http.NewRequest("POST", rpc, buf)
+	if err != nil {
+		return
+	}
+	req.Header.Add("X-Transmission-Session-Id", session)
+	resp, err := client.Do(req)
 
 	if err != nil {
-		fmt.Println(err)
 		return
 	}
 
 	body, err := ioutil.ReadAll(resp.Body)
-	fmt.Println(string(body))
+	if err != nil {
+		return
+	}
+	out = string(body)
 
+	return
 }
 
-func TransGetSession() string {
+func TransGetSession(url string) (session string, err error) {
 	b := make([]byte, 0)
 	buf := bytes.NewBuffer(b)
-	resp, err := http.Post("http://nas3.local:9091/transmission/rpc", "image/jpeg", buf)
+	resp, err := http.Post(url, "image/jpeg", buf)
 
 	if err != nil {
-		fmt.Println(err)
-		return ""
+		return
 	}
 
-	return resp.Header.Get("X-Transmission-Session-Id")
+	session = resp.Header.Get("X-Transmission-Session-Id")
+
+	return
 }
