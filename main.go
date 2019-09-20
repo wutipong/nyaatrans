@@ -26,7 +26,8 @@ func main() {
 	minPeer := flag.Int("min_peers", 100, "minimum peers")
 	path := flag.String("path", "/mnt/storage1/manga", "download path")
 
-	if *rssURL == "" || *transURL == "" {
+	help := flag.Bool("help", false, "Print Help Message")
+	if *help {
 		flag.Usage()
 		return
 	}
