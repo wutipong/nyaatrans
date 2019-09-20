@@ -32,4 +32,7 @@ func main() {
 	for _, i := range items {
 		fmt.Println(i.Link)
 	}
+	fmt.Println(TransGetSession())
+
+	//TransAddTorrent(items[0].Link)
 }
