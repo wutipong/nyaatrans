@@ -27,6 +27,9 @@ func main() {
 	path := flag.String("path", "/mnt/storage1/manga", "download path")
 
 	help := flag.Bool("help", false, "Print Help Message")
+
+	flag.Parse()
+
 	if *help {
 		flag.Usage()
 		return
