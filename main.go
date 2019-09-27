@@ -3,13 +3,39 @@ package main
 import (
 	"flag"
 	"log"
+
+	"github.com/apaxa-go/eval"
 )
+
+func filter(item NyaaTorrentItem) (result bool, err error) {
+	arg := eval.Args{
+		"item": eval.MakeDataRegularInterface(item),
+	}
+
+	src := "item.Seeder > 100"
+	expr, err := eval.ParseString(src, "")
+
+	if err != nil {
+		return
+	}
+
+	r, err := expr.EvalToInterface(arg)
+	if err != nil {
+		return
+	}
+
+	result = r.(bool)
+
+	return
+
+}
 
 func FilterNyaaItems(in []NyaaTorrentItem, min int) []NyaaTorrentItem {
 	var out []NyaaTorrentItem
 
 	for _, i := range in {
-		if i.Seeder+i.Leecher < min {
+		//if i.Seeder+i.Leecher < min {
+		if r, e := filter(i); e != nil || !r {
 			continue
 		}
 
@@ -57,5 +83,4 @@ func main() {
 			continue
 		}
 	}
-
 }
