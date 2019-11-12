@@ -7,12 +7,14 @@ import (
 	"net/http"
 )
 
+//TransRequest a request to Transmission.
 type TransRequest struct {
 	Method    string                 `json:"method"`
 	Arguments map[string]interface{} `json:"arguments"`
 	Tag       int                    `json:"tag"`
 }
 
+//TransAddTorrent add a torrent into the transmission service.
 func TransAddTorrent(rpc string, url string, session string, path string) (out string, err error) {
 	tr := TransRequest{
 		Method: "torrent-add",
@@ -50,6 +52,7 @@ func TransAddTorrent(rpc string, url string, session string, path string) (out s
 	return
 }
 
+//TransGetSession get a transmission session id.
 func TransGetSession(url string) (session string, err error) {
 	b := make([]byte, 0)
 	buf := bytes.NewBuffer(b)
