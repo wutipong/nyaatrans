@@ -8,15 +8,9 @@ import (
 	"github.com/namsral/flag"
 )
 
-func filter(item NyaaTorrentItem, exprStr string) (result bool, err error) {
+func filter(item NyaaTorrentItem, expr *eval.Expression) (result bool, err error) {
 	arg := eval.Args{
 		"item": eval.MakeDataRegularInterface(item),
-	}
-
-	expr, err := eval.ParseString(exprStr, "")
-
-	if err != nil {
-		return
 	}
 
 	r, err := expr.EvalToInterface(arg)
@@ -31,11 +25,16 @@ func filter(item NyaaTorrentItem, exprStr string) (result bool, err error) {
 }
 
 //FilterNyaaItems filter out items that does not match the criteria.
-func FilterNyaaItems(in []NyaaTorrentItem, expr string) []NyaaTorrentItem {
+func FilterNyaaItems(items []NyaaTorrentItem, expr string) []NyaaTorrentItem {
 	var out []NyaaTorrentItem
 
-	for _, i := range in {
-		if r, e := filter(i, expr); e != nil || !r {
+	exprObj, err := eval.ParseString(expr, "")
+	if err != nil {
+		return out
+	}
+
+	for _, i := range items {
+		if result, e := filter(i, exprObj); e != nil || !result {
 			continue
 		}
 
@@ -43,13 +42,12 @@ func FilterNyaaItems(in []NyaaTorrentItem, expr string) []NyaaTorrentItem {
 	}
 
 	return out
-
 }
 
 func main() {
 	rssURL := flag.String("rss", "https://sukebei.nyaa.si/?page=rss&c=1_4&f=0", "rss url")
 	transURL := flag.String("transmission", "http://localhost:9091/transmission/rpc", "Transmission RPC url")
-	condition := flag.String("min_peers", "item.Seeder > 100", "condition")
+	condition := flag.String("condition", "item.Seeder > 100", "condition")
 	path := flag.String("download_path", "/mnt/storage1/manga", "download path")
 
 	help := flag.Bool("help", false, "Print Help Message")
