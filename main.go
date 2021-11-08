@@ -1,11 +1,11 @@
 package main
 
 import (
-	"flag"
 	"fmt"
 	"log"
 
 	"github.com/apaxa-go/eval"
+	"github.com/namsral/flag"
 )
 
 func filter(item NyaaTorrentItem, exprStr string) (result bool, err error) {
@@ -50,7 +50,7 @@ func main() {
 	rssURL := flag.String("rss", "https://sukebei.nyaa.si/?page=rss&c=1_4&f=0", "rss url")
 	transURL := flag.String("transmission", "http://localhost:9091/transmission/rpc", "Transmission RPC url")
 	condition := flag.String("min_peers", "item.Seeder > 100", "condition")
-	path := flag.String("path", "/mnt/storage1/manga", "download path")
+	path := flag.String("download_path", "/mnt/storage1/manga", "download path")
 
 	help := flag.Bool("help", false, "Print Help Message")
 
