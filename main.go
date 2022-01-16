@@ -3,6 +3,10 @@ package main
 import (
 	"fmt"
 	"log"
+	"os"
+	"os/signal"
+	"syscall"
+	"time"
 
 	"github.com/apaxa-go/eval"
 	"github.com/namsral/flag"
@@ -49,6 +53,7 @@ func main() {
 	transURL := flag.String("transmission", "http://localhost:9091/transmission/rpc", "Transmission RPC url")
 	condition := flag.String("condition", "item.Seeder > 100", "condition")
 	path := flag.String("download_path", "/mnt/storage1/manga", "download path")
+	runAt := flag.String("run_at", "", "the time the task is run. download immediately if not specified.")
 
 	help := flag.Bool("help", false, "Print Help Message")
 
@@ -62,16 +67,61 @@ func main() {
 
 	log.Println("Nyaa->Transmission Daemon")
 
-	items, err := FetchTorrentItem(*rssURL)
+	var nextRun time.Time
+	if *runAt == "" {
+		nextRun = time.Now()
+	} else {
+		t, err := time.Parse(time.Kitchen, *runAt)
+		if err != nil {
+			log.Println(err)
+			return
+		}
+
+		now := time.Now()
+		nextRun = time.Date(now.Year(), now.Month(), now.Day(), t.Hour(), t.Minute(), t.Second(), t.Nanosecond(), now.Location())
+		log.Printf("next run: %v", nextRun)
+	}
+
+	running := true
+
+	c := make(chan os.Signal)
+	signal.Notify(c, os.Interrupt, syscall.SIGTERM)
+	go func() {
+		<-c
+		running = false
+	}()
+
+	for running {
+		now := time.Now()
+		if now.After(nextRun) {
+			log.Println("begin adding task.")
+			downloads(*rssURL, *condition, *transURL, *path)
+			log.Println("done adding task.")
+
+			if *runAt == "" {
+				break
+			}
+
+			nextRun = nextRun.AddDate(0, 0, 1)
+			log.Printf("next run: %v", nextRun)
+
+		}
+
+		time.Sleep(time.Minute)
+	}
+}
+
+func downloads(rssURL, condition, transURL, path string) {
+	items, err := FetchTorrentItem(rssURL)
 
 	if err != nil {
 		log.Println(err)
 		return
 	}
 
-	items = FilterNyaaItems(items, *condition)
+	items = FilterNyaaItems(items, condition)
 
-	session, err := TransGetSession(*transURL)
+	session, err := TransGetSession(transURL)
 	if err != nil {
 		log.Println(err)
 		return
@@ -79,7 +129,7 @@ func main() {
 
 	for _, i := range items {
 		log.Printf("Adding torrent: %s \n", i.Title)
-		_, err := TransAddTorrent(*transURL, i.Link, session, *path)
+		_, err := TransAddTorrent(transURL, i.Link, session, path)
 		if err != nil {
 			log.Println(err)
 			continue
