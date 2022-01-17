@@ -3,12 +3,10 @@ package main
 import (
 	"fmt"
 	"log"
-	"os"
-	"os/signal"
-	"syscall"
 	"time"
 
 	"github.com/apaxa-go/eval"
+	"github.com/go-co-op/gocron"
 	"github.com/namsral/flag"
 )
 
@@ -67,48 +65,22 @@ func main() {
 
 	log.Println("Nyaa->Transmission Daemon")
 
-	var nextRun time.Time
 	if *runAt == "" {
-		nextRun = time.Now()
-	} else {
-		t, err := time.Parse(time.Kitchen, *runAt)
-		if err != nil {
-			log.Println(err)
-			return
-		}
-
-		now := time.Now()
-		nextRun = time.Date(now.Year(), now.Month(), now.Day(), t.Hour(), t.Minute(), t.Second(), t.Nanosecond(), now.Location())
-		log.Printf("next run: %v", nextRun)
+		log.Println("begin adding task.")
+		downloads(*rssURL, *condition, *transURL, *path)
+		log.Println("done adding task.")
+		return
 	}
 
-	running := true
+	s := gocron.NewScheduler(time.UTC)
+	s.Every(1).Days().At(*runAt).Do(func() {
+		log.Println("begin adding task.")
+		downloads(*rssURL, *condition, *transURL, *path)
+		log.Println("done adding task.")
+	})
 
-	c := make(chan os.Signal)
-	signal.Notify(c, os.Interrupt, syscall.SIGTERM)
-	go func() {
-		<-c
-		running = false
-	}()
+	s.StartBlocking()
 
-	for running {
-		now := time.Now()
-		if now.After(nextRun) {
-			log.Println("begin adding task.")
-			downloads(*rssURL, *condition, *transURL, *path)
-			log.Println("done adding task.")
-
-			if *runAt == "" {
-				break
-			}
-
-			nextRun = nextRun.AddDate(0, 0, 1)
-			log.Printf("next run: %v", nextRun)
-
-		}
-
-		time.Sleep(time.Minute)
-	}
 }
 
 func downloads(rssURL, condition, transURL, path string) {
