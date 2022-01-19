@@ -3,8 +3,11 @@ package main
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"net/http"
+
+	"github.com/pkg/errors"
 )
 
 //TransRequest a request to Transmission.
@@ -56,6 +59,9 @@ func TransAddTorrent(rpc string, url string, session string, path string) (out T
 	}
 	str := string(body)
 	err = json.Unmarshal([]byte(str), &out)
+	if err != nil {
+		err = errors.Wrap(err, fmt.Sprintf("Invalid response: %s", str))
+	}
 
 	return
 }
