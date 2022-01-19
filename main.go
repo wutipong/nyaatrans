@@ -65,6 +65,14 @@ func main() {
 
 	log.Println("Nyaa->Transmission Daemon")
 
+	log.Printf("RSS URL: %s", *rssURL)
+	log.Printf("Transmission URL: %s", *transURL)
+	log.Printf("Condition: %s", *condition)
+	log.Printf("Download Path: %s", *path)
+	if *runAt != "" {
+		log.Printf("Run at: %s", *runAt)
+	}
+
 	if *runAt == "" {
 		log.Println("begin adding task.")
 		downloads(*rssURL, *condition, *transURL, *path)
