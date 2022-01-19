@@ -14,8 +14,15 @@ type TransRequest struct {
 	Tag       int                    `json:"tag"`
 }
 
+//TransAddResult a result from TransAddTorrent function.
+type TransAddResult struct {
+	Arguments interface{} `json:"arguments"`
+	Result    string      `json:"result"`
+	Tag       int         `json:"tag"`
+}
+
 //TransAddTorrent add a torrent into the transmission service.
-func TransAddTorrent(rpc string, url string, session string, path string) (out string, err error) {
+func TransAddTorrent(rpc string, url string, session string, path string) (out TransAddResult, err error) {
 	tr := TransRequest{
 		Method: "torrent-add",
 		Arguments: map[string]interface{}{
@@ -47,7 +54,8 @@ func TransAddTorrent(rpc string, url string, session string, path string) (out s
 	if err != nil {
 		return
 	}
-	out = string(body)
+	str := string(body)
+	err = json.Unmarshal([]byte(str), &out)
 
 	return
 }

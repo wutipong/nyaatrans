@@ -101,10 +101,12 @@ func downloads(rssURL, condition, transURL, path string) {
 
 	for _, i := range items {
 		log.Printf("Adding torrent: %s \n", i.Title)
-		_, err := TransAddTorrent(transURL, i.Link, session, path)
+		resp, err := TransAddTorrent(transURL, i.Link, session, path)
 		if err != nil {
 			log.Println(err)
 			continue
 		}
+
+		log.Printf("Response: %s", resp.Result)
 	}
 }
