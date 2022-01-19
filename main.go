@@ -121,7 +121,7 @@ CONDITION       : Condition string. The torrent will be added only the condition
 		return
 	}
 
-	s := gocron.NewScheduler(time.UTC)
+	s := gocron.NewScheduler(time.Local)
 	s.Every(1).Days().At(runAt).Do(func() {
 		log.Println("begin adding task.")
 		Perform(rssURL, condition, transURL, path, doDryRun)
