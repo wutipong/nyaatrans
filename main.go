@@ -77,7 +77,6 @@ RSS_URL         : Nyaa's rss feed url.
 TRANSMISSION_URL: Transmission RPC url, ie. http://localhost:9091/transmission/rpc
 DOWNLOAD_PATH   : Download path. Can be left blank for default location.
 RUN_AT          : The scheduled time. Left blank to run the task immediately.
-                  Use the format "18:00PM"
 
 CONDITION       : Condition string. The torrent will be added only the condition is met.
                   Condition string should look something like "item.Seeder > 100".
@@ -122,11 +121,15 @@ CONDITION       : Condition string. The torrent will be added only the condition
 	}
 
 	s := gocron.NewScheduler(time.Local)
-	s.Every(1).Days().At(runAt).Do(func() {
+	_, err = s.Every(1).Days().At(runAt).Do(func() {
 		log.Println("begin adding task.")
 		Perform(rssURL, condition, transURL, path, doDryRun)
 		log.Println("done adding task.")
 	})
+
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	s.StartBlocking()
 
