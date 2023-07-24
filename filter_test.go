@@ -1,10 +1,10 @@
 package main
 
 import (
-	"testing"
-
-	"github.com/apaxa-go/eval"
+	"github.com/antonmedv/expr"
 	"github.com/stretchr/testify/suite"
+
+	"testing"
 )
 
 type EvalulateTestSuite struct {
@@ -16,34 +16,37 @@ func TestEvalulateTestSuite(t *testing.T) {
 }
 
 func (suite *EvalulateTestSuite) TestEmptyExpression() {
-	expr := ""
-	_, err := eval.ParseString(expr, "")
+	expression := ""
+	_, err := expr.Compile(expression, expr.Env(NyaaTorrentItem{}))
+
 	suite.Assert().NotNil(err)
 }
 
 func (suite *EvalulateTestSuite) TestSeederExceedExpr() {
-	expr := "item.Seeder > 20"
-	exprObj, _ := eval.ParseString(expr, "")
+	expression := "Seeder > 20"
+	program, err := expr.Compile(expression, expr.Env(NyaaTorrentItem{}))
+	suite.Assert().Nil(err)
 
 	item := NyaaTorrentItem{
 		Seeder: 100,
 	}
 
-	res, err := Evaluate(item, exprObj)
+	res, err := Evaluate(item, program)
 
 	suite.Assert().Nil(err)
 	suite.Assert().True(res)
 }
 
 func (suite *EvalulateTestSuite) TestSeederNotExceedExpr() {
-	expr := "item.Seeder > 20"
-	exprObj, _ := eval.ParseString(expr, "")
+	expression := "Seeder > 20"
+	program, err := expr.Compile(expression, expr.Env(NyaaTorrentItem{}))
+	suite.Assert().Nil(err)
 
 	item := NyaaTorrentItem{
 		Seeder: 5,
 	}
 
-	res, err := Evaluate(item, exprObj)
+	res, err := Evaluate(item, program)
 
 	suite.Assert().Nil(err)
 	suite.Assert().False(res)

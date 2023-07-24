@@ -1,34 +1,32 @@
 package main
 
-import "github.com/apaxa-go/eval"
+import (
+	"github.com/antonmedv/expr"
+	"github.com/antonmedv/expr/vm"
+)
 
-func Evaluate(item NyaaTorrentItem, expr *eval.Expression) (result bool, err error) {
-	arg := eval.Args{
-		"item": eval.MakeDataRegularInterface(item),
-	}
-
-	r, err := expr.EvalToInterface(arg)
+func Evaluate(item NyaaTorrentItem, program *vm.Program) (result bool, err error) {
+	res, err := expr.Run(program, item)
 	if err != nil {
 		return
 	}
 
-	result = r.(bool)
+	result = res.(bool)
 
 	return
-
 }
 
 // FilterNyaaItems filter out items that does not match the criteria.
-func FilterNyaaItems(items []NyaaTorrentItem, expr string) []NyaaTorrentItem {
+func FilterNyaaItems(items []NyaaTorrentItem, expression string) []NyaaTorrentItem {
 	var out []NyaaTorrentItem
 
-	exprObj, err := eval.ParseString(expr, "")
+	program, err := expr.Compile(expression, expr.Env(NyaaTorrentItem{}))
 	if err != nil {
 		return out
 	}
 
 	for _, i := range items {
-		if result, e := Evaluate(i, exprObj); e != nil || !result {
+		if result, e := Evaluate(i, program); e != nil || !result {
 			continue
 		}
 
