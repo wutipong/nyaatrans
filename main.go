@@ -41,12 +41,12 @@ RSS_URL         : Nyaa's rss feed url.
 TRANSMISSION_URL: Transmission RPC url, ie. http://localhost:9091/transmission/rpc
 DOWNLOAD_PATH   : Download path. Can be left blank for default location.
 RUN_AT          : The scheduled time. Left blank to run the task immediately.
-RUN_ON_START	: Add task immediately at the startup time.
+RUN_ON_START	: Add tasks immediately at the startup time.
 
 CONDITION       : Condition string. The torrent will be added only the condition is met.
-                  Condition string should look something like "item.Seeder > 100".
+                  Condition string should look something like "Seeder > 100".
 
-                  item contains Seeder, Leecher, Title and PubDate fields.
+                  The field can be Seeder, Leecher, Title and PubDate.
 		`)
 		return
 	}
