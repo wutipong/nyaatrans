@@ -24,6 +24,7 @@ func main() {
 	path := os.Getenv("DOWNLOAD_PATH")
 	runAt := os.Getenv("RUN_AT")
 	dryRun := os.Getenv("DRY_RUN")
+	runOnStart := os.Getenv("RUN_ON_START")
 
 	help := flag.Bool("help", false, "Print Help Message")
 
@@ -40,6 +41,7 @@ RSS_URL         : Nyaa's rss feed url.
 TRANSMISSION_URL: Transmission RPC url, ie. http://localhost:9091/transmission/rpc
 DOWNLOAD_PATH   : Download path. Can be left blank for default location.
 RUN_AT          : The scheduled time. Left blank to run the task immediately.
+RUN_ON_START	: Add task immediately at the startup time.
 
 CONDITION       : Condition string. The torrent will be added only the condition is met.
                   Condition string should look something like "item.Seeder > 100".
@@ -76,11 +78,19 @@ CONDITION       : Condition string. The torrent will be added only the condition
 		doDryRun = b
 	}
 
-	if runAt == "" {
+	doRunOnStart := false
+	if b, err := strconv.ParseBool(runOnStart); err == nil {
+		doRunOnStart = b
+	}
+
+	if runAt == "" || doRunOnStart {
 		log.Println("begin adding task.")
 		Perform(rssURL, condition, transURL, path, doDryRun)
 		log.Println("done adding task.")
-		return
+
+		if runAt == "" {
+			return
+		}
 	}
 
 	s := gocron.NewScheduler(time.Local)
