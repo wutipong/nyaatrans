@@ -18,12 +18,11 @@ func Evaluate(item NyaaTorrentItem, program *vm.Program) (result bool, err error
 }
 
 // FilterNyaaItems filter out items that does not match the criteria.
-func FilterNyaaItems(items []NyaaTorrentItem, expression string) []NyaaTorrentItem {
-	var out []NyaaTorrentItem
+func FilterNyaaItems(expression string, items []NyaaTorrentItem) (out []NyaaTorrentItem, err error) {
 
 	program, err := expr.Compile(expression, expr.Env(NyaaTorrentItem{}))
 	if err != nil {
-		return out
+		return
 	}
 
 	for _, i := range items {
@@ -34,5 +33,5 @@ func FilterNyaaItems(items []NyaaTorrentItem, expression string) []NyaaTorrentIt
 		out = append(out, i)
 	}
 
-	return out
+	return
 }

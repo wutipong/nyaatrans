@@ -101,13 +101,16 @@ CONDITION       : Condition string. The torrent will be added only the condition
 // Perform read RSS feeds and add the torrent to transmission.
 func Perform(rssURL, condition, transURL, path string, dryRun bool) {
 	items, err := FetchTorrentItem(rssURL)
-
 	if err != nil {
 		log.Println(err)
 		return
 	}
 
-	items = FilterNyaaItems(items, condition)
+	items, err = FilterNyaaItems(condition, items)
+	if err != nil {
+		log.Println(err)
+		return
+	}
 
 	session, err := TransGetSession(transURL)
 	if err != nil {

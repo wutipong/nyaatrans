@@ -60,6 +60,24 @@ func TestFilterNyaaItemsTestSuite(t *testing.T) {
 	suite.Run(t, new(FilterNyaaItemsTestSuite))
 }
 
+func (suite *FilterNyaaItemsTestSuite) TestInvalidExpression() {
+	expression := "Hello > 20"
+	items := []NyaaTorrentItem{
+		{
+			Seeder: 100,
+		},
+		{
+			Seeder: 10,
+		},
+		{
+			Seeder: 200,
+		},
+	}
+
+	_, err := FilterNyaaItems(expression, items)
+	suite.Assert().NotNil(err)
+}
+
 func (suite *FilterNyaaItemsTestSuite) TestMultipleItems() {
 	expression := "Seeder > 20"
 	items := []NyaaTorrentItem{
@@ -74,8 +92,9 @@ func (suite *FilterNyaaItemsTestSuite) TestMultipleItems() {
 		},
 	}
 
-	output := FilterNyaaItems(items, expression)
+	output, err := FilterNyaaItems(expression, items)
 
+	suite.Assert().Nil(err)
 	suite.Assert().ElementsMatch(output, []NyaaTorrentItem{
 		{
 			Seeder: 100,
@@ -100,8 +119,8 @@ func (suite *FilterNyaaItemsTestSuite) TestAllFails() {
 		},
 	}
 
-	output := FilterNyaaItems(items, expression)
-
+	output, err := FilterNyaaItems(expression, items)
+	suite.Assert().Nil(err)
 	suite.Assert().ElementsMatch(output, []NyaaTorrentItem{})
 }
 
@@ -109,7 +128,7 @@ func (suite *FilterNyaaItemsTestSuite) TestEmpty() {
 	expression := "Seeder > 20"
 	items := []NyaaTorrentItem{}
 
-	output := FilterNyaaItems(items, expression)
-
+	output, err := FilterNyaaItems(expression, items)
+	suite.Assert().Nil(err)
 	suite.Assert().ElementsMatch(output, []NyaaTorrentItem{})
 }
