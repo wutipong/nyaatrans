@@ -5,6 +5,7 @@ import (
 	"github.com/antonmedv/expr/vm"
 )
 
+// Evaluate if the current item pass the thresshold
 func Evaluate(item NyaaTorrentItem, program *vm.Program) (result bool, err error) {
 	res, err := expr.Run(program, item)
 	if err != nil {

@@ -51,3 +51,65 @@ func (suite *EvalulateTestSuite) TestSeederNotExceedExpr() {
 	suite.Assert().Nil(err)
 	suite.Assert().False(res)
 }
+
+type FilterNyaaItemsTestSuite struct {
+	suite.Suite
+}
+
+func TestFilterNyaaItemsTestSuite(t *testing.T) {
+	suite.Run(t, new(FilterNyaaItemsTestSuite))
+}
+
+func (suite *FilterNyaaItemsTestSuite) TestMultipleItems() {
+	expression := "Seeder > 20"
+	items := []NyaaTorrentItem{
+		{
+			Seeder: 100,
+		},
+		{
+			Seeder: 10,
+		},
+		{
+			Seeder: 200,
+		},
+	}
+
+	output := FilterNyaaItems(items, expression)
+
+	suite.Assert().ElementsMatch(output, []NyaaTorrentItem{
+		{
+			Seeder: 100,
+		},
+		{
+			Seeder: 200,
+		},
+	})
+}
+
+func (suite *FilterNyaaItemsTestSuite) TestAllFails() {
+	expression := "Seeder > 20"
+	items := []NyaaTorrentItem{
+		{
+			Seeder: 1,
+		},
+		{
+			Seeder: 10,
+		},
+		{
+			Seeder: 2,
+		},
+	}
+
+	output := FilterNyaaItems(items, expression)
+
+	suite.Assert().ElementsMatch(output, []NyaaTorrentItem{})
+}
+
+func (suite *FilterNyaaItemsTestSuite) TestEmpty() {
+	expression := "Seeder > 20"
+	items := []NyaaTorrentItem{}
+
+	output := FilterNyaaItems(items, expression)
+
+	suite.Assert().ElementsMatch(output, []NyaaTorrentItem{})
+}
